@@ -1,0 +1,26 @@
+{% load static %}
+
+<div class="media">
+    <img src = "{% static 'img/avatar.jpg' %}" class="mr-3">
+    <div class="media-body">
+        <h5 class="mt-0">
+            <a href="{% url 'question_page' qid=question.id %}">{{ question.title }}</a>
+        </h5>
+        {{ question.text }}
+    </div>
+
+    <div class="pad-ver">
+        <a href="{% url 'question_page' question.id %}" class="btn btn-sm btn-default btn-hover-primary">Answers :
+            {% for k, v in answers.items %}
+                {% if k ==  question.id %}
+                    {{ v }}
+                {% endif %}
+                {% endfor %}
+                </a>
+                <span>tags:</span>
+             {% for tag in question.tags.all %}
+                 <a href="{% url 'tag_page' tag %}"><span>{{tag}}</span></a>
+             {% endfor %}
+            </div>
+
+</div>
