@@ -17,7 +17,13 @@ from django.contrib import admin
 from django.urls import path, include
 from app import views
 from django.contrib.auth import views as auth_views
-
+from django.conf.urls import url
+from django.contrib.auth.decorators import login_required
+from app.models import LikeDislike
+from app.models import Article, Comment
+from app.views import CreateAccount, SettingProfile, CreatePost, Questions
+from django.conf.urls.static import static
+from django.conf import settings
 
 
 urlpatterns = [
@@ -26,15 +32,10 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('hot/', views.index, name='hot'),
 
-    path('question/<int:qid>/', views.question_page, name='question_page'),
-    path('question/<int:qid>/leave_answer', views.leave_answer, name='leave_answer'),
-
-    path('signup/', views.signup, name='signup'),
-    path('singup/create_accaunt', views.create_accounts_add, name="create_accounts_add"),
-
-
-    path('ask/', views.create_post, name='new_question'),
-    path('ask/ask_question', views.ask_question, name='ask_question'),
+    path('question/<int:qid>/', Questions.as_view(), name='question_page'),
+    path('signup/', CreateAccount.as_view(), name='signup'),
+    path('ask/', CreatePost.as_view(), name='new_question'),
+    path('profile', SettingProfile.as_view(), name='user_profile'),
 
     path('login/', auth_views.LoginView.as_view(), name="login"),
     path('logout/', auth_views.LogoutView.as_view(), name="logout"),
@@ -43,8 +44,5 @@ urlpatterns = [
 
     path('tag/<slug:tag_slug>', views.index, name='tag_page'),
 
-    path('profile', views.user_profile, name='user_profile'),
-    path('profile/done', views.user_profile_done, name='user_profile_done'),
-    path('accounts/', include('django.contrib.auth.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-]

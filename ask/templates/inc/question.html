@@ -1,12 +1,21 @@
 {% load static %}
+    <div class="my-3 p-3 bg-white rounded shadow-sm">
 
 <div class="media">
-    <img src = "{% static 'img/avatar.jpg' %}" class="mr-3">
+    <img src = "{{ question.author_id.img.url }}" style="width: 100px; height: 100px" class="mr-3">
     <div class="media-body">
         <h5 class="mt-0">
             <a href="{% url 'question_page' qid=question.id %}">{{ question.title }}</a>
         </h5>
         {{ question.text }}
+                     {% if user.is_authenticated %}
+
+            <div class="pad-ver">
+
+            <button type="button" class="btn btn-outline-success">↑</button>
+                <button type="button" class="btn btn-outline-warning">↓</button>
+            </div>
+        {% endif %}
     </div>
 
     <div class="pad-ver">
@@ -24,3 +33,4 @@
             </div>
 
 </div>
+    </div>

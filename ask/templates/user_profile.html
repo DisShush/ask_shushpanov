@@ -3,57 +3,32 @@
 {% block content %}
 
 
-
-<div class="row">
- <form action="{% url 'user_profile_done'%}" method="POST">
-                  {% csrf_token %}
-    <div class="col-md-8 order-md-1">
-      <form class="needs-validation" novalidate="">
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="firstName">First name</label>
-            <input type="text" name="firstName" class="form-control" id="firstName" placeholder="{{ user.first_name }}" value="{{ user.first_name }}" >
-            <div class="invalid-feedback">
-              Valid first name is required.
+<main class="main ml-5" >
+       <div class="my-3 p-3 bg-white rounded shadow-sm">
+        <div class="form-section">
+            <form action="{% url 'user_profile' %}" enctype="multipart/form-data" method="POST">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-8">
+                            {% for field in form %}
+                                <div class="form-droup">
+                                {{ field.label }}
+                                {{ field }}
+                                <br>
+                                </div>
+                            {% endfor %}
+                        <br>
+                         <div class="mb-3">
+                            <a class="btn btn-primary" href="{% url 'password_change'%}">Change password</a>
+                         </div>
+                        <button type="submit" class="btn btn-outline-info">Restration</button>
+                        </div>
+                    </div>
+            </form>
             </div>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="lastName">Last name</label>
-            <input type="text" name="lastName" class="form-control" id="lastName" placeholder="{{ user.last_name }}" value="{{ user.last_name }}" >
-            <div class="invalid-feedback">
-              Valid last name is required.
-            </div>
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="username">Username</label>
-          <div class="input-group">
-            <input type="text" name="username" class="form-control" id="username" value="{{ user.username }}" placeholder="{{ user.username }}" >
-            <div class="invalid-feedback" style="width: 100%;">
-              Your username is required.
-            </div>
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label for="email">Email <span class="text-muted">(Optional)</span></label>
-          <input type="email" name="email" class="form-control" value="{{ user.email }}" id="email" placeholder="{{ user.email }}">
-          <div class="invalid-feedback">
-            Please enter a valid email address.
-          </div>
-        </div>
-
-        <div class="mb-3">
-            <a class="btn btn-primary" href="{% url 'password_change'%}">Change password</a>
-          </div>
-
-             <input type="file" name="img" value="avatar.jpg" accept="image/*" class="clearablefileinput form-control" id="id_img">
-
-        <hr class="mb-4">
-        <button class="btn btn-primary btn-lg btn-block" type="submit">подтвердить изменения</button>
-      </form>
     </div>
- </form>
-  </div>
+
+  </main>
+</main>
+
 {% endblock content %}

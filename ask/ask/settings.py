@@ -28,6 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'app.Profile'
 
 # Application definition
 
@@ -40,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'app',
     'taggit',
+    'dajaxice',
+    'dajax',
 ]
 
 MIDDLEWARE = [
@@ -90,7 +93,6 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -131,3 +133,6 @@ STATICFILES_DIRS = [
 
 # url to redirect after successfull login
 LOGIN_REDIRECT_URL = '/'
+
+MEDIA_URL = '/img/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'img')

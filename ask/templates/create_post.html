@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 {% extends 'base.html' %}
 {% load static %}
 
@@ -10,7 +9,7 @@
         <div class="my-3 p-3 bg-white rounded shadow-sm">
 
             <div class="form-section">
-                <form action="{% url 'ask_question' %}" method="POST">
+                <form action="{% url 'new_question' %}" method="POST">
                     {% csrf_token %}
                     <div class="row">
                         <div class="col-10 label-inputs">

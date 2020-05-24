@@ -1,12 +1,16 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from app.models import Question, Answer, Profile
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.urls import reverse
 from taggit.models import Tag
 from django.utils import timezone
-from .forms import add_post
+from .forms import *
+from django.views import View
+from django.contrib.contenttypes.models import ContentType
+from .models import LikeDislike
+from django.core.files.storage import FileSystemStorage
 
 
 def paginate(objects_list, request, obj_per_list=2):
@@ -28,78 +32,91 @@ def index(request, tag_slug=None):
     for question in Question.objects.all():
         answers[question.id] = Answer.objects.filter(question=question.id).count()
 
-    users = User.objects.all()
     profiles = Profile.objects.all()
-
     return render(request, 'index.html', {'questions': questions,
-                                               'title': title, 'answers': answers,
-                                               'users': users, 'profiles': profiles})
+                                            'title': title, 'answers': answers,
+                                            'profiles': profiles})
 
 
-def question_page(request, qid):
-    questions = get_object_or_404(Question, pk=qid)
-    answers = {}
-    answers[questions.id] = Answer.objects.filter(question=questions.id).count()
-    comments = Answer.objects.get_queryset().filter(question=qid).order_by('create_date')
-    comments = paginate(comments, request, 5)
-    users = User.objects.all()
-    profiles = Profile.objects.all()
-    return render(request, 'question.html', {
-        'question': questions, 'comments': comments,
-        'users': users, 'profiles': profiles, 'answers': answers
-    })
+class CreateAccount(View):
+    def get(self, request):
+        form = add_register()
+        return render(request, 'signup.html', {'form': form})
 
-
-def signup(request):
-    return render(request, 'signup.html', {
-
-    })
-
-
-def ask_question(request):
-    if request.method == "POST":
-        form = add_post(request.POST)
+    def post(self, request):
+        form = add_register(request.POST, request.FILES)
         if form.is_valid():
-            question = form.save(commit=False)
-            question.author_id = request.user
-            question.save()
-            form.save_m2m()
-            return HttpResponseRedirect(reverse('question_page', args=[question.id]))
-    else:
+            acc = form.save(commit=False)
+            form.save()
+            acc.set_password(acc.password)
+            acc.is_active = True
+            acc.save()
+            return HttpResponseRedirect(reverse('login'))
+        return HttpResponseRedirect(reverse('signup'))
+
+
+class SettingProfile(View):
+        def get(self, request):
+            curr_acc = Profile.objects.get(username=request.user)
+            form = setting_profile(instance=curr_acc)
+            return render(request, 'user_profile.html', {'form': form})
+
+        def post(self, request):
+            form = setting_profile(request.POST, request.FILES)
+            if form.is_valid():
+                user = Profile.objects.get(username=request.user)
+                user.email = form.data.get("email")
+                user.first_name = form.data.get("first_name")
+                user.last_name = form.data.get("last_name")
+                user.img = form.files.get("img", default=user.img)
+                user.save()
+                return HttpResponseRedirect(reverse('index'))
+            return HttpResponseRedirect(reverse('user_profile'))
+
+
+class CreatePost(View):
+    def get(self, request):
         form = add_post()
-    return render(request, 'index.html')
+        return render(request, 'create_post.html', {'form': form})
+
+    def post(self, request):
+        if request.method == "POST":
+            form = add_post(request.POST)
+            if form.is_valid():
+                question = form.save(commit=False)
+                question.author_id = request.user
+                question.save()
+                form.save_m2m()
+                return HttpResponseRedirect(reverse('question_page', args=[question.id]))
+            return render(request, 'index.html')
 
 
-def create_post(request):
-    form = add_post()
-    return render(request, 'create_post.html', {'form': form})
+class Questions(View):
+    def get(self, request, qid):
+        form = add_answer()
+        questions = get_object_or_404(Question, pk=qid)
+        answers = {}
+        answers[questions.id] = Answer.objects.filter(question=questions.id).count()
+        comments = Answer.objects.get_queryset().filter(question=qid).order_by('create_date')
+        comments = paginate(comments, request, 5)
+        users = Profile.objects.all()
+        profiles = Profile.objects.all()
+        return render(request, 'question.html', {
+            'question': questions, 'comments': comments,
+            'users': users, 'profiles': profiles, 'answers': answers,
+            'form': form,
+        })
 
+    def post(self, request, qid):
+        question = get_object_or_404(Question, pk=qid)
+        if request.method == "POST":
+            form = add_answer(request.POST)
+            if form.is_valid():
+                answer = form.save(commit=False)
+                answer.author_id = request.user
+                answer.question = question
+                answer.save()
+                form.save_m2m()
+                return HttpResponseRedirect(reverse('question_page', args=[question.id]))
+            return HttpResponseRedirect(reverse('index'))
 
-def create_accounts_add(request):
-    user = User.objects.create_user(username=request.POST['username'], email=request.POST['email'],
-                                    password=request.POST['Password'], first_name=request.POST['firstName'],
-                                    last_name=request.POST['lastName'])
-    user.save()
-    profile = Profile.objects.create(user=user, img=request.POST['img'])
-    profile.save()
-    return HttpResponseRedirect(reverse('login'))
-
-
-def leave_answer(request, qid):
-    question = get_object_or_404(Question, pk=qid)
-    question.answer_set.create(author_id=request.user, text=request.POST['text'], create_date=timezone.now())
-    return HttpResponseRedirect(reverse('question_page', args=[question.id]))
-
-
-def user_profile_done(request):
-    user = User.objects.get(username=request.user)
-    user.username = request.POST.get("username")
-    user.email = request.POST.get("email")
-    user.first_name = request.POST.get("firstName")
-    user.last_name = request.POST.get("lastName")
-    user.save()
-    return HttpResponseRedirect(reverse('index'))
-
-
-def user_profile(request):
-    return render(request, 'user_profile.html')
