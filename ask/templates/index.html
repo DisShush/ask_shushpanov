@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% for question in questions %}
+        {% include 'inc/question.html'%}
+    {% endfor %}
+
+    {% include 'inc/page_navig.html' %}
+{% endblock content %}

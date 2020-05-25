@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+
+<main class="main ml-5" >
+       <div class="my-3 p-3 bg-white rounded shadow-sm">
+        <div class="form-section">
+            <form action="{% url 'signup' %}" enctype="multipart/form-data" method="POST">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-8">
+                            {% for field in form %}
+                                <div class="form-droup">
+                                {% if field.errors %}
+                                    <div class="alert alert-danger">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+                                {{ field.label }}
+                                {{ field }}
+                                <br>
+                                </div>
+                            {% endfor %}
+                            <br>
+                        <button type="submit" class="btn btn-outline-info">Restration</button>
+                        </div>
+                    </div>
+            </form>
+            </div>
+    </div>
+
+  </main>
+{% endblock content %}
