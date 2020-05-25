@@ -41,7 +41,7 @@ class AddRegister(forms.ModelForm):
         }
 
 
-class SettingProfile(forms.ModelForm):
+class SettingUser(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['email', 'first_name', 'last_name', 'img']

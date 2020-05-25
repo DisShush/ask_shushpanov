@@ -57,11 +57,11 @@ class CreateAccount(View):
 class SettingProfile(View):
         def get(self, request):
             curr_acc = Profile.objects.get(username=request.user)
-            form = SettingProfile(instance=curr_acc)
+            form = SettingUser(instance=curr_acc)
             return render(request, 'user_profile.html', {'form': form})
 
         def post(self, request):
-            form = SettingProfile(request.POST, request.FILES)
+            form = SettingUser(request.POST, request.FILES)
             if form.is_valid():
                 user = Profile.objects.get(username=request.user)
                 user.email = form.data.get("email")
